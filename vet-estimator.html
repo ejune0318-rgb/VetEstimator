@@ -1,0 +1,710 @@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>반려동물 병원비 견적기</title>
+<style>
+  :root {
+    /* colors — Airbnb-derived tokens (DESIGN.md) */
+    --primary: #ff385c;
+    --primary-active: #e00b41;
+    --primary-disabled: #ffd1da;
+    --ink: #222222;
+    --body: #3f3f3f;
+    --muted: #6a6a6a;
+    --muted-soft: #929292;
+    --hairline: #dddddd;
+    --hairline-soft: #ebebeb;
+    --border-strong: #c1c1c1;
+    --canvas: #ffffff;
+    --surface-soft: #f7f7f7;
+    --surface-strong: #f2f2f2;
+    --on-primary: #ffffff;
+    --error: #c13515;
+
+    /* radius scale */
+    --r-xs: 4px;
+    --r-sm: 8px;
+    --r-md: 14px;
+    --r-lg: 20px;
+    --r-xl: 32px;
+    --r-full: 9999px;
+
+    /* spacing scale (4px base) */
+    --sp-xxs: 2px;
+    --sp-xs: 4px;
+    --sp-sm: 8px;
+    --sp-md: 12px;
+    --sp-base: 16px;
+    --sp-lg: 24px;
+    --sp-xl: 32px;
+    --sp-xxl: 48px;
+    --sp-section: 64px;
+
+    /* single elevation tier */
+    --shadow-1: rgba(0, 0, 0, 0.02) 0 0 0 1px, rgba(0, 0, 0, 0.04) 0 2px 6px 0, rgba(0, 0, 0, 0.1) 0 4px 8px 0;
+
+    --font: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  /* Airbnb ships no public dark mode — this page commits to the same
+     single light surface rather than inventing one. */
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- top nav ---------- */
+
+  .topnav {
+    background: var(--canvas);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .topnav-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 var(--sp-xl);
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-base);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-sm);
+  }
+  .wordmark {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.1px;
+    color: var(--ink);
+  }
+  .badge-pill {
+    background: var(--canvas);
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.18;
+    border-radius: var(--r-full);
+    padding: 4px 12px;
+    box-shadow: var(--shadow-1);
+    white-space: nowrap;
+  }
+
+  /* ---------- page ---------- */
+
+  .page {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: var(--sp-xxl) var(--sp-xl) var(--sp-section);
+  }
+
+  .intro h1 {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: 0;
+    margin: 0 0 var(--sp-xs);
+    text-wrap: balance;
+    color: var(--ink);
+  }
+  .intro p {
+    margin: 0 0 var(--sp-xl);
+    font-size: 16px;
+    color: var(--muted);
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1.55fr 1fr;
+    gap: var(--sp-xl);
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--canvas);
+  }
+
+  /* ---------- form panel ---------- */
+
+  .form-panel {
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    padding: var(--sp-xl);
+  }
+
+  .field-block { margin-bottom: var(--sp-xl); }
+  .field-block:last-of-type { margin-bottom: var(--sp-lg); }
+
+  .block-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 var(--sp-xxs);
+    color: var(--ink);
+  }
+  .block-sub {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0 0 var(--sp-base);
+  }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-base);
+  }
+
+  .text-input-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-xs);
+  }
+  .text-input-field label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .text-input-field select,
+  .text-input-field input[type="number"] {
+    font: inherit;
+    font-size: 16px;
+    color: var(--ink);
+    background: var(--canvas);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-sm);
+    height: 52px;
+    padding: 14px 12px;
+    width: 100%;
+    appearance: none;
+  }
+  .text-input-field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23717171' stroke-width='1.6' fill='none' fill-rule='evenodd' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 34px;
+  }
+
+  select:focus-visible,
+  input:focus-visible {
+    outline: none;
+    border-color: var(--ink);
+    border-width: 2px;
+    padding-block: 13px;
+  }
+
+  /* ---------- toggle row ---------- */
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-base);
+    padding: var(--sp-base) 0;
+    border-top: 1px solid var(--hairline-soft);
+    border-bottom: 1px solid var(--hairline-soft);
+    margin-bottom: var(--sp-xl);
+  }
+  .row-title { font-size: 16px; font-weight: 400; color: var(--ink); margin: 0; }
+  .row-sub { font-size: 14px; color: var(--muted); margin: 2px 0 0; }
+
+  .switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex: none;
+  }
+  .switch input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .switch .track {
+    position: absolute; inset: 0;
+    background: var(--border-strong);
+    border-radius: var(--r-full);
+    transition: background 0.15s ease;
+  }
+  .switch .thumb {
+    position: absolute; top: 2px; left: 2px;
+    width: 20px; height: 20px;
+    background: var(--canvas);
+    border-radius: 50%;
+    transition: transform 0.15s ease;
+    box-shadow: var(--shadow-1);
+  }
+  .switch input:checked + .track { background: var(--primary); }
+  .switch input:checked + .track + .thumb { transform: translateX(20px); }
+  .switch input:focus-visible + .track { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  /* ---------- item list (amenity-row style) ---------- */
+
+  .item-list {
+    border-top: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .item-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-md);
+    padding: var(--sp-md) 0;
+  }
+  .item-row + .item-row { border-top: none; }
+
+  .item-row input[type="checkbox"] {
+    margin-top: 3px;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--ink);
+    flex: none;
+    cursor: pointer;
+  }
+
+  .item-text { display: flex; flex-direction: column; gap: 1px; }
+  .item-name { font-size: 16px; font-weight: 400; color: var(--ink); }
+  .item-desc { font-size: 14px; color: var(--muted); }
+
+  .hosp-row {
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--hairline-soft);
+    margin-top: var(--sp-sm);
+    padding-top: var(--sp-base);
+  }
+  .hosp-row input[type="number"] {
+    width: 88px;
+    height: 44px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-sm);
+    padding: 0 12px;
+    font: inherit;
+    font-size: 16px;
+    color: var(--ink);
+  }
+
+  .btn-secondary {
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ink);
+    background: var(--canvas);
+    border: 1px solid var(--ink);
+    border-radius: var(--r-sm);
+    padding: 13px 23px;
+    height: 48px;
+    cursor: pointer;
+  }
+  .btn-secondary:hover { background: var(--surface-soft); }
+  .btn-secondary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  /* ---------- summary card (reservation-card style) ---------- */
+
+  .summary-wrap { position: sticky; top: var(--sp-xl); }
+
+  .summary-card {
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-1);
+    padding: var(--sp-lg);
+  }
+
+  .summary-eyebrow {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    margin: 0 0 var(--sp-sm);
+  }
+
+  .tier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--canvas);
+    box-shadow: var(--shadow-1);
+    border-radius: var(--r-full);
+    padding: 4px 12px 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: var(--sp-lg);
+  }
+  .tier-badge .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--ink);
+    flex: none;
+  }
+
+  .fee-stack { display: flex; flex-direction: column; }
+
+  .fee-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-base);
+    padding: 6px 0;
+    font-size: 14px;
+    color: var(--body);
+  }
+  .fee-row .fee-price {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--ink);
+  }
+  .fee-row.muted-row { color: var(--muted); font-size: 13px; }
+  .fee-row.muted-row .fee-price { color: var(--muted); }
+  .fee-row.empty { justify-content: center; color: var(--muted-soft); padding: var(--sp-base) 0; }
+
+  .fee-row.subtotal {
+    font-weight: 600;
+    color: var(--ink);
+    padding-top: var(--sp-sm);
+  }
+  .fee-row.subtotal .fee-price { color: var(--ink); }
+
+  .hairline-rule {
+    border: none;
+    border-top: 1px solid var(--hairline);
+    margin: var(--sp-base) 0;
+  }
+
+  .total-block {
+    margin-top: var(--sp-base);
+    padding-top: var(--sp-lg);
+    border-top: 1px solid var(--hairline);
+  }
+  .total-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 6px;
+  }
+  .total-value {
+    font-variant-numeric: tabular-nums;
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    color: var(--ink);
+    line-height: 1.15;
+  }
+  .total-value .unit { font-size: 18px; font-weight: 600; color: var(--muted); }
+
+  .disclaimer {
+    margin-top: var(--sp-lg);
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--muted-soft);
+  }
+
+  .legal-band {
+    border-top: 1px solid var(--hairline);
+    padding: var(--sp-xl) var(--sp-xl);
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+
+<div class="topnav">
+  <div class="topnav-inner">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill="#ff385c">
+          <ellipse cx="11.5" cy="10.5" rx="2.6" ry="3.5" transform="rotate(-18 11.5 10.5)"/>
+          <ellipse cx="22.5" cy="10.5" rx="2.6" ry="3.5" transform="rotate(18 22.5 10.5)"/>
+          <ellipse cx="7.8" cy="17.5" rx="2.3" ry="3.1" transform="rotate(-30 7.8 17.5)"/>
+          <ellipse cx="26.2" cy="17.5" rx="2.3" ry="3.1" transform="rotate(30 26.2 17.5)"/>
+          <path d="M17 16.2c4 0 7.1 2.9 7.1 6.2 0 2.2-1.9 3.7-4.5 3.7-1.1 0-1.8-.4-2.6-.4s-1.5.4-2.6.4c-2.6 0-4.5-1.5-4.5-3.7 0-3.3 3.1-6.2 7.1-6.2z"/>
+        </g>
+      </svg>
+      <span class="wordmark">펫케어 견적기</span>
+    </div>
+    <span class="badge-pill">참고용 추정치</span>
+  </div>
+</div>
+
+<main class="page">
+  <div class="intro">
+    <h1>반려동물 병원비 견적기</h1>
+    <p>진료 항목을 선택하면 예상 비용 범위를 바로 확인할 수 있어요</p>
+  </div>
+
+  <div class="layout">
+
+    <!-- form -->
+    <section class="panel form-panel">
+      <div class="field-block">
+        <p class="block-title">기본 정보</p>
+        <p class="block-sub">체중과 진료 조건에 따라 비용 구간이 달라져요</p>
+        <div class="field-grid">
+          <div class="text-input-field">
+            <label for="species">동물 종류</label>
+            <select id="species">
+              <option value="dog">강아지</option>
+              <option value="cat">고양이</option>
+              <option value="other">기타 소동물</option>
+            </select>
+          </div>
+          <div class="text-input-field">
+            <label for="weight">체중 (kg)</label>
+            <input type="number" id="weight" min="0.3" max="90" step="0.1" value="5.5" />
+          </div>
+          <div class="text-input-field">
+            <label for="gender">성별 (중성화 수술 시 반영)</label>
+            <select id="gender">
+              <option value="male">수컷</option>
+              <option value="female">암컷</option>
+            </select>
+          </div>
+          <div class="text-input-field">
+            <label for="region">지역</label>
+            <select id="region">
+              <option value="metro">서울 · 수도권</option>
+              <option value="city">광역시</option>
+              <option value="rural">그 외 지방</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <p class="row-title">야간 · 공휴일 응급진료</p>
+          <p class="row-sub">일반 진료시간 외 방문 시 할증이 붙어요</p>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="emergency" />
+          <span class="track"></span>
+          <span class="thumb"></span>
+        </label>
+      </div>
+
+      <div class="field-block">
+        <p class="block-title">진료 · 처치 항목</p>
+        <p class="block-sub">받을 예정인 항목을 모두 선택하세요</p>
+        <div class="item-list" id="itemList"></div>
+
+        <div class="item-row hosp-row">
+          <div class="item-text">
+            <span class="item-name">입원</span>
+            <span class="item-desc">입원이 필요한 경우 일수를 입력하세요 (박 기준)</span>
+          </div>
+          <input type="number" id="hospDays" min="0" max="30" step="1" value="0" />
+        </div>
+      </div>
+
+      <button class="btn-secondary" id="resetBtn" type="button">입력값 초기화</button>
+    </section>
+
+    <!-- summary -->
+    <aside class="summary-wrap">
+      <div class="panel summary-card">
+        <p class="summary-eyebrow">예상 병원비</p>
+        <div class="tier-badge">
+          <span class="dot"></span>
+          <span id="tierLabel">체중 기준 중형(5–15kg) 요금 적용</span>
+        </div>
+
+        <div id="itemLines" class="fee-stack"></div>
+
+        <div class="fee-row subtotal">
+          <span>진료 항목 소계</span>
+          <span class="fee-price" id="subtotalVal">0원</span>
+        </div>
+        <div class="fee-row muted-row" id="regionRow">
+          <span id="regionLabel">지역 반영 (서울 · 수도권 ×1.10)</span>
+          <span class="fee-price" id="regionVal">0원</span>
+        </div>
+        <div class="fee-row muted-row" id="surchargeRow" style="display:none;">
+          <span>야간 · 응급 할증 (약 15–30%)</span>
+          <span class="fee-price" id="surchargeVal">0원</span>
+        </div>
+
+        <div class="total-block">
+          <p class="total-label">예상 총 진료비</p>
+          <div class="total-value" id="totalVal">0 <span class="unit">원</span></div>
+        </div>
+
+        <p class="disclaimer">
+          국내 동물병원은 병원별 자율 요금제를 운영하여 실제 진료비 편차가 큽니다.
+          이 결과는 항목별 시세를 바탕으로 한 참고용 추정치이며, 부가세(VAT)가 포함된 범위입니다.
+          정확한 비용은 방문 전 해당 병원에 직접 문의해 주세요.
+        </p>
+      </div>
+    </aside>
+
+  </div>
+</main>
+
+<footer class="legal-band">사용된 단가는 일반적인 국내 동물병원 시세 범위를 참고해 구성한 예시값입니다.</footer>
+
+<script>
+(function () {
+  var PRICING = {
+    consult:      { label: "기본 진찰료", desc: "내원 시 기본 문진 · 신체검사", flat: [10000, 15000], defaultOn: true },
+    vaccineCore:  { label: "종합백신 접종 (1회)", desc: "DHPPL 등 혼합백신", flat: [20000, 35000] },
+    vaccineRabies:{ label: "광견병 예방접종", desc: "법정 필수 접종", flat: [15000, 20000] },
+    scaling:      { label: "스케일링 (치석제거)", desc: "전신마취 포함, 체중별 차등", tiered: { small: [150000, 250000], medium: [200000, 300000], large: [250000, 400000] } },
+    neuter:       { label: "중성화수술", desc: "성별 · 체중에 따라 차등", tieredByGender: {
+                      male:   { small: [150000, 250000], medium: [200000, 350000], large: [300000, 450000] },
+                      female: { small: [250000, 400000], medium: [300000, 450000], large: [400000, 600000] }
+                    } },
+    xray:         { label: "엑스레이 촬영", desc: "부위당 1회 기준", flat: [30000, 60000] },
+    bloodTest:    { label: "혈액검사 (기본)", desc: "CBC + 일반 생화학 검사", flat: [50000, 100000] },
+    ultrasound:   { label: "초음파검사", desc: "복부 또는 흉부 1부위", flat: [80000, 150000] }
+  };
+
+  var HOSP_PER_DAY = { small: [30000, 50000], medium: [40000, 65000], large: [60000, 80000] };
+
+  var REGION = {
+    metro: { label: "서울 · 수도권", mult: 1.10 },
+    city:  { label: "광역시", mult: 1.00 },
+    rural: { label: "그 외 지방", mult: 0.92 }
+  };
+
+  var TIER_LABEL = {
+    small:  "소형(5kg 미만)",
+    medium: "중형(5–15kg)",
+    large:  "대형(15kg 초과)"
+  };
+
+  var itemListEl = document.getElementById("itemList");
+  var checkboxes = {};
+
+  Object.keys(PRICING).forEach(function (key) {
+    var item = PRICING[key];
+    var row = document.createElement("label");
+    row.className = "item-row";
+    row.innerHTML =
+      '<input type="checkbox" id="chk_' + key + '"' + (item.defaultOn ? " checked" : "") + '>' +
+      '<span class="item-text"><span class="item-name">' + item.label + '</span>' +
+      '<span class="item-desc">' + item.desc + '</span></span>';
+    itemListEl.appendChild(row);
+    checkboxes[key] = row.querySelector("input");
+    checkboxes[key].addEventListener("change", compute);
+  });
+
+  var speciesEl = document.getElementById("species");
+  var weightEl = document.getElementById("weight");
+  var genderEl = document.getElementById("gender");
+  var regionEl = document.getElementById("region");
+  var emergencyEl = document.getElementById("emergency");
+  var hospDaysEl = document.getElementById("hospDays");
+
+  [speciesEl, weightEl, genderEl, regionEl, hospDaysEl].forEach(function (el) {
+    el.addEventListener("input", compute);
+    el.addEventListener("change", compute);
+  });
+  emergencyEl.addEventListener("change", compute);
+
+  document.getElementById("resetBtn").addEventListener("click", function () {
+    speciesEl.value = "dog";
+    weightEl.value = "5.5";
+    genderEl.value = "male";
+    regionEl.value = "metro";
+    emergencyEl.checked = false;
+    hospDaysEl.value = "0";
+    Object.keys(checkboxes).forEach(function (key) {
+      checkboxes[key].checked = !!PRICING[key].defaultOn;
+    });
+    compute();
+  });
+
+  function won(n) {
+    return Math.round(n).toLocaleString("ko-KR") + "원";
+  }
+
+  function tierFromWeight(species, weight) {
+    if (species === "other") return "small";
+    if (!weight || weight < 5) return "small";
+    if (weight <= 15) return "medium";
+    return "large";
+  }
+
+  function compute() {
+    var species = speciesEl.value;
+    var weight = parseFloat(weightEl.value) || 0;
+    var gender = genderEl.value;
+    var region = REGION[regionEl.value];
+    var emergency = emergencyEl.checked;
+    var hospDays = Math.max(0, parseInt(hospDaysEl.value, 10) || 0);
+    var tier = tierFromWeight(species, weight);
+
+    document.getElementById("tierLabel").textContent = "체중 기준 " + TIER_LABEL[tier] + " 요금 적용";
+
+    var lines = [];
+    var subMin = 0, subMax = 0;
+
+    Object.keys(PRICING).forEach(function (key) {
+      if (!checkboxes[key].checked) return;
+      var item = PRICING[key];
+      var range;
+      if (item.flat) {
+        range = item.flat;
+      } else if (item.tiered) {
+        range = item.tiered[tier];
+      } else if (item.tieredByGender) {
+        range = item.tieredByGender[gender][tier];
+      }
+      subMin += range[0];
+      subMax += range[1];
+      lines.push({ label: item.label, min: range[0], max: range[1] });
+    });
+
+    if (hospDays > 0) {
+      var perDay = HOSP_PER_DAY[tier];
+      var hMin = perDay[0] * hospDays;
+      var hMax = perDay[1] * hospDays;
+      subMin += hMin;
+      subMax += hMax;
+      lines.push({ label: "입원 (" + hospDays + "박)", min: hMin, max: hMax });
+    }
+
+    var linesEl = document.getElementById("itemLines");
+    if (lines.length === 0) {
+      linesEl.innerHTML = '<div class="fee-row empty">선택된 진료 항목이 없어요</div>';
+    } else {
+      linesEl.innerHTML = lines.map(function (l) {
+        return '<div class="fee-row"><span>' + l.label + '</span>' +
+          '<span class="fee-price">' + won(l.min) + ' ~ ' + won(l.max) + '</span></div>';
+      }).join("");
+    }
+
+    document.getElementById("subtotalVal").textContent = won(subMin) + " ~ " + won(subMax);
+
+    var regionMin = subMin * region.mult;
+    var regionMax = subMax * region.mult;
+    document.getElementById("regionLabel").textContent =
+      "지역 반영 (" + region.label + " ×" + region.mult.toFixed(2) + ")";
+    document.getElementById("regionVal").textContent = won(regionMin) + " ~ " + won(regionMax);
+
+    var totalMin = regionMin, totalMax = regionMax;
+    var surchargeRow = document.getElementById("surchargeRow");
+    if (emergency) {
+      var surMin = regionMin * 0.15;
+      var surMax = regionMax * 0.30;
+      totalMin += surMin;
+      totalMax += surMax;
+      document.getElementById("surchargeVal").textContent = won(surMin) + " ~ " + won(surMax);
+      surchargeRow.style.display = "flex";
+    } else {
+      surchargeRow.style.display = "none";
+    }
+
+    document.getElementById("totalVal").innerHTML =
+      won(totalMin).replace("원", "") + " ~ " + won(totalMax).replace("원", "") + ' <span class="unit">원</span>';
+  }
+
+  compute();
+})();
+</script>
