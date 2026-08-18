@@ -304,6 +304,23 @@
   .btn-secondary:hover { background: var(--surface-soft); }
   .btn-secondary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
+  .btn-primary {
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--on-primary);
+    background: var(--primary);
+    border: none;
+    border-radius: var(--r-sm);
+    padding: 14px 24px;
+    height: 48px;
+    width: 100%;
+    cursor: pointer;
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--primary-active); }
+  .btn-primary:disabled { background: var(--primary-disabled); cursor: not-allowed; }
+  .btn-primary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
   /* ---------- summary card (reservation-card style) ---------- */
 
   .summary-wrap { position: sticky; top: var(--sp-xl); }
@@ -323,9 +340,9 @@
   }
 
   .tier-badge {
-    display: inline-flex;
+    display: flex;
+    width: max-content;
     align-items: center;
-    gap: 6px;
     background: var(--canvas);
     box-shadow: var(--shadow-1);
     border-radius: var(--r-full);
@@ -338,6 +355,7 @@
   .tier-badge .dot {
     width: 6px; height: 6px; border-radius: 50%;
     background: var(--ink);
+    margin-right: 6px;
     flex: none;
   }
 
@@ -347,7 +365,6 @@
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    gap: var(--sp-base);
     padding: 6px 0;
     font-size: 14px;
     color: var(--body);
@@ -389,7 +406,6 @@
     font-variant-numeric: tabular-nums;
     font-size: 34px;
     font-weight: 700;
-    letter-spacing: -0.4px;
     color: var(--ink);
     line-height: 1.15;
   }
@@ -400,6 +416,15 @@
     font-size: 13px;
     line-height: 1.55;
     color: var(--muted-soft);
+  }
+
+  .save-row { margin-top: var(--sp-lg); }
+  .save-status {
+    margin: var(--sp-sm) 0 0;
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    min-height: 16px;
   }
 
   .legal-band {
@@ -508,7 +533,7 @@
 
     <!-- summary -->
     <aside class="summary-wrap">
-      <div class="panel summary-card">
+      <div class="panel summary-card" id="summaryCard">
         <p class="summary-eyebrow">예상 병원비</p>
         <div class="tier-badge">
           <span class="dot"></span>
@@ -540,6 +565,11 @@
           이 결과는 항목별 시세를 바탕으로 한 참고용 추정치이며, 부가세(VAT)가 포함된 범위입니다.
           정확한 비용은 방문 전 해당 병원에 직접 문의해 주세요.
         </p>
+
+        <div class="save-row" data-capture-exclude>
+          <button class="btn-primary" id="saveBtn" type="button">결과 이미지로 저장</button>
+          <p class="save-status" id="saveStatus" role="status" aria-live="polite"></p>
+        </div>
       </div>
     </aside>
 
@@ -548,6 +578,7 @@
 
 <footer class="legal-band">사용된 단가는 일반적인 국내 동물병원 시세 범위를 참고해 구성한 예시값입니다.</footer>
 
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
 (function () {
   var PRICING = {
@@ -706,5 +737,47 @@
   }
 
   compute();
+
+  var saveBtn = document.getElementById("saveBtn");
+  var saveStatus = document.getElementById("saveStatus");
+  var summaryCard = document.getElementById("summaryCard");
+
+  saveBtn.addEventListener("click", function () {
+    if (typeof html2canvas === "undefined") {
+      saveStatus.textContent = "이미지 저장 기능을 불러오지 못했어요. 인터넷 연결을 확인한 뒤 다시 시도해주세요.";
+      return;
+    }
+
+    var excluded = summaryCard.querySelectorAll("[data-capture-exclude]");
+    excluded.forEach(function (el) { el.style.display = "none"; });
+
+    saveBtn.disabled = true;
+    saveStatus.textContent = "이미지 생성 중...";
+
+    var fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+
+    fontsReady
+      .then(function () {
+        return html2canvas(summaryCard, { backgroundColor: "#ffffff", scale: 2, letterRendering: true });
+      })
+      .then(function (canvas) {
+        var today = new Date();
+        var stamp = today.getFullYear() +
+          String(today.getMonth() + 1).padStart(2, "0") +
+          String(today.getDate()).padStart(2, "0");
+        var link = document.createElement("a");
+        link.download = "반려동물_병원비_견적_" + stamp + ".png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        saveStatus.textContent = "이미지가 저장되었어요.";
+      })
+      .catch(function () {
+        saveStatus.textContent = "저장에 실패했어요. 다시 시도해주세요.";
+      })
+      .finally(function () {
+        excluded.forEach(function (el) { el.style.display = ""; });
+        saveBtn.disabled = false;
+      });
+  });
 })();
 </script>
