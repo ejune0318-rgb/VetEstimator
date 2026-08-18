@@ -579,8 +579,23 @@
 <footer class="legal-band">사용된 단가는 일반적인 국내 동물병원 시세 범위를 참고해 구성한 예시값입니다.</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 (function () {
+  var SUPABASE_URL = "https://kzjbktmvvjxrddzhuybj.supabase.co";
+  var SUPABASE_ANON_KEY = "sb_publishable_beD4ZgSnPuAq5WmOLV_fQA_tAOTAa-d";
+
+  var db = (typeof supabase !== "undefined")
+    ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+
+  function logEstimate(estimate) {
+    if (!db || !estimate) return;
+    db.from("estimates").insert(estimate).then(function (result) {
+      if (result.error) console.error("Supabase insert failed:", result.error.message);
+    });
+  }
+
   var PRICING = {
     consult:      { label: "기본 진찰료", desc: "내원 시 기본 문진 · 신체검사", flat: [10000, 15000], defaultOn: true },
     vaccineCore:  { label: "종합백신 접종 (1회)", desc: "DHPPL 등 혼합백신", flat: [20000, 35000] },
@@ -631,6 +646,7 @@
   var regionEl = document.getElementById("region");
   var emergencyEl = document.getElementById("emergency");
   var hospDaysEl = document.getElementById("hospDays");
+  var lastEstimate = null;
 
   [speciesEl, weightEl, genderEl, regionEl, hospDaysEl].forEach(function (el) {
     el.addEventListener("input", compute);
@@ -689,7 +705,7 @@
       }
       subMin += range[0];
       subMax += range[1];
-      lines.push({ label: item.label, min: range[0], max: range[1] });
+      lines.push({ key: key, label: item.label, min: range[0], max: range[1] });
     });
 
     if (hospDays > 0) {
@@ -698,7 +714,7 @@
       var hMax = perDay[1] * hospDays;
       subMin += hMin;
       subMax += hMax;
-      lines.push({ label: "입원 (" + hospDays + "박)", min: hMin, max: hMax });
+      lines.push({ key: "hospitalization", label: "입원 (" + hospDays + "박)", min: hMin, max: hMax });
     }
 
     var linesEl = document.getElementById("itemLines");
@@ -734,6 +750,21 @@
 
     document.getElementById("totalVal").innerHTML =
       won(totalMin).replace("원", "") + " ~ " + won(totalMax).replace("원", "") + ' <span class="unit">원</span>';
+
+    lastEstimate = {
+      species: species,
+      weight: weight,
+      tier: tier,
+      gender: gender,
+      region: regionEl.value,
+      emergency: emergency,
+      hospital_days: hospDays,
+      selected_items: lines.map(function (l) { return { key: l.key, label: l.label, min: l.min, max: l.max }; }),
+      subtotal_min: Math.round(subMin),
+      subtotal_max: Math.round(subMax),
+      total_min: Math.round(totalMin),
+      total_max: Math.round(totalMax)
+    };
   }
 
   compute();
@@ -753,6 +784,8 @@
 
     saveBtn.disabled = true;
     saveStatus.textContent = "이미지 생성 중...";
+
+    logEstimate(lastEstimate);
 
     var fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
 
