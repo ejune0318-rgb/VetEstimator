@@ -35,3 +35,14 @@ create policy "Anonymous users can submit estimates"
   for insert
   to anon
   with check (true);
+
+
+-- Migration 2: actual-price feedback
+-- Run this in the SQL Editor if the `estimates` table above already exists.
+-- Visitors can optionally report what they actually paid after their vet
+-- visit; this is a separate insert (same table) rather than an update,
+-- since the anon key intentionally has no update/select permission.
+
+alter table public.estimates
+  add column if not exists actual_price integer check (actual_price is null or actual_price >= 0),
+  add column if not exists comparison text check (comparison is null or comparison in ('cheaper', 'similar', 'more_expensive'));
