@@ -796,8 +796,6 @@
     saveBtn.disabled = true;
     saveStatus.textContent = "이미지 생성 중...";
 
-    logEstimate(lastEstimate);
-
     var fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
 
     fontsReady
@@ -814,6 +812,10 @@
         link.href = canvas.toDataURL("image/png");
         link.click();
         saveStatus.textContent = "이미지가 저장되었어요.";
+
+        // Only logged once the image actually generated and the download
+        // fired — a row in Supabase means the save genuinely succeeded.
+        logEstimate(lastEstimate);
       })
       .catch(function () {
         saveStatus.textContent = "저장에 실패했어요. 다시 시도해주세요.";
